@@ -1,8 +1,6 @@
 package com.siemens.ct.bam.users;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 public class AutoRegister {
 
@@ -27,23 +25,48 @@ public class AutoRegister {
     }
 
 
-    public void alocateCar(Long cnp, String plateNumber)
-    {
+    public void alocateCar(Long cnp, String plateNumber) throws AlreadyAlocatedException {
         //Exception if car already alocated
+        if(regAuto.containsKey(plateNumber))
+            throw new AlreadyAlocatedException("Car has already an owner: "+ regUsers.get(regAuto.get(plateNumber)));
 
         regAuto.put(plateNumber,cnp);
     }
 
-    public User getUserForCar(String plateNumber)
-    {
+    public User getUserForCar(String plateNumber) throws NotAlocatedException {
+        //Car is not alocated;
+        if(!regAuto.containsKey(plateNumber))
+            throw new NotAlocatedException("Car does not have an owner..." + regCars.get(plateNumber));
 
         return regUsers.get(regAuto.get(plateNumber));
     }
 
-//    public TreeSet getCarsForUsers(Long cnp)
-//    {
-//
-//    }
+    public HashSet<Car> getCarsForUsers(Long cnp) throws NotAlocatedException {
+        //Exception for User without cars;
+        if(!regAuto.containsValue(cnp))
+            throw new NotAlocatedException("User does not have any cars... " + regUsers.get(cnp));
+
+        HashSet<Car> myCars = new HashSet<>();
+        for(Object itPlateNumber: regAuto.keySet())
+        {
+            if(regAuto.get(itPlateNumber) == cnp)
+                myCars.add(regCars.get(itPlateNumber));
+        }
+
+        return myCars;
+    }
+
+    public HashSet<Car> getCarsFromState(String state)
+    {
+
+        HashSet<Car> myCars = new HashSet<>();
+        for(String itPlateNumber : regCars.keySet())
+            if(itPlateNumber.startsWith(state))
+                myCars.add(regCars.get(itPlateNumber));
+
+        return myCars;
+    }
+
 
 
     public int getSizeUsers()
