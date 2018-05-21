@@ -1,5 +1,7 @@
 package com.siemens.ct.bam.users;
 
+import java.util.Objects;
+
 public class Car {
     private String plateNumber;
     private String brand;
@@ -42,4 +44,13 @@ public class Car {
                 ", brand: " + brand + ' ' +
                 ", colour: " + colour + ' ' + '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Car car = (Car) o;
+        return Objects.equals(plateNumber, car.plateNumber) &&
+                Objects.equals(brand, car.brand) &&
+                Objects.equals(colour, car.colour);
+    }
+
 }

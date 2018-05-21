@@ -1,5 +1,7 @@
 package com.siemens.ct.bam.users;
 
+import java.util.Objects;
+
 public class User {
 
     private String name;
@@ -42,4 +44,13 @@ public class User {
     public String toString() {
         return "User{ " + "Name: " + surname + " " + name + ", CNP: " + cnp + "}";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        User user = (User) o;
+        return Objects.equals(name, user.name) &&
+                Objects.equals(surname, user.surname) &&
+                Objects.equals(cnp, user.cnp);
+    }
+
 }
