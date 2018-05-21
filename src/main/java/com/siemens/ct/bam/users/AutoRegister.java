@@ -6,7 +6,7 @@ public class AutoRegister {
 
     private Map<Long, User> regUsers = new HashMap<>();
     private Map<String, Car> regCars = new HashMap<>();
-    private Map<String, Long> regAuto = new HashMap<>();
+    private Map<String, HashSet<Long>> regAuto = new HashMap<>();
 
     public void registerUser(User user) throws AlreadyExistException {
         //Exception if user already exists
@@ -25,33 +25,55 @@ public class AutoRegister {
     }
 
 
-    public void alocateCar(Long cnp, String plateNumber) throws AlreadyAlocatedException {
-        //Exception if car already alocated
-        if(regAuto.containsKey(plateNumber))
-            throw new AlreadyAlocatedException("Car has already an owner: "+ regUsers.get(regAuto.get(plateNumber)));
+    public void alocateCar(Long cnp, String plateNumber) throws AlreadyAlocatedException, CarDoesNotExistException, UserNotRegistered {
+        if(regCars.get(plateNumber)==null)
+            throw new CarDoesNotExistException("Car is not registered... " + regCars.get(plateNumber));
 
-        regAuto.put(plateNumber,cnp);
+        if(regUsers.get(cnp)==null)
+            throw new UserNotRegistered("User is not registerd... " + regUsers.get(cnp));
+
+        //Exception if car already alocated
+        if(!regAuto.containsKey(plateNumber)) {
+            HashSet<Long> drivers = new HashSet<>();
+            drivers.add(cnp);
+            regAuto.put(plateNumber, drivers);
+        }
+        else
+        {
+            regAuto.get(plateNumber).add(cnp);
+        }
+
     }
 
-    public User getUserForCar(String plateNumber) throws NotAlocatedException {
+
+
+    public HashSet<User> getUserForCar(String plateNumber) throws NotAlocatedException {
         //Car is not alocated;
         if(!regAuto.containsKey(plateNumber))
             throw new NotAlocatedException("Car does not have an owner..." + regCars.get(plateNumber));
 
-        return regUsers.get(regAuto.get(plateNumber));
+        HashSet<User> drivers = new HashSet<>();
+        for (Long cnp: regAuto.get(plateNumber))
+            drivers.add(regUsers.get(cnp));
+
+        return drivers;
     }
 
     public HashSet<Car> getCarsForUsers(Long cnp) throws NotAlocatedException {
         //Exception for User without cars;
-        if(!regAuto.containsValue(cnp))
-            throw new NotAlocatedException("User does not have any cars... " + regUsers.get(cnp));
+//        if(!regAuto.containsValue(cnp))
+//            throw new NotAlocatedException("User does not have any cars... " + regUsers.get(cnp));
 
         HashSet<Car> myCars = new HashSet<>();
+        int count = 0;
         for(Object itPlateNumber: regAuto.keySet())
-        {
-            if(regAuto.get(itPlateNumber) == cnp)
-                myCars.add(regCars.get(itPlateNumber));
-        }
+            for(Long itcnp : regAuto.get(itPlateNumber))
+                if(itcnp.equals(cnp)) {
+                    myCars.add(regCars.get(itPlateNumber));
+                    count++;
+                }
+        if(count < 1)
+            throw new NotAlocatedException("User does not have any cars... " + regUsers.get(cnp));
 
         return myCars;
     }
@@ -89,10 +111,15 @@ public class AutoRegister {
 
     public boolean existCar(Car car)
     {
-        if(regUsers.containsKey(car.getPlateNumber()))
+        if(regCars.containsKey(car.getPlateNumber()))
             return true;
 
         return false;
+    }
+
+    public int getSizeAutoReg()
+    {
+        return regAuto.size();
     }
 
 }
